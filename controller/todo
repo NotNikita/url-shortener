@@ -1,0 +1,24 @@
+// -> TODO: Worker pool inside controllers:
+// result := make(chan string)
+//     task := workerpool.Task{
+//         LongURL: longURL[0],
+//         Result:  result,
+//     }
+
+//     cnt.workerPool.Tasks <- task
+
+//     select {
+//     case shortURL := <-result:
+//         if shortURL == "" {
+//             return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+//                 "error": "Failed to shorten URL",
+//             })
+//         }
+//         return c.Status(fiber.StatusOK).JSON(fiber.Map{
+//             "short_url": shortURL,
+//         })
+//     case <-time.After(5 * time.Second): // Timeout after 5 seconds
+//         return c.Status(fiber.StatusGatewayTimeout).JSON(fiber.Map{
+//             "error": "Request timed out",
+//         })
+//     }
