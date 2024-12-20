@@ -19,12 +19,12 @@ import (
 // Urls Controller
 type UrlsController struct {
 	ctx      *fiber.Ctx
-	services *service.Manager
+	services *service.ServiceManager
 	logger   *zap.Logger
 }
 
 // Creates a new Urls Controller
-func NewUrlsController(ctx *fiber.Ctx, services *service.Manager, logger *zap.Logger) *UrlsController {
+func NewUrlsController(ctx *fiber.Ctx, services *service.ServiceManager, logger *zap.Logger) *UrlsController {
 	return &UrlsController{
 		ctx:      ctx,
 		services: services,
@@ -34,6 +34,7 @@ func NewUrlsController(ctx *fiber.Ctx, services *service.Manager, logger *zap.Lo
 
 // Interface of UrlsController: shorten a given url
 func (cnt *UrlsController) ShortenUrl(c *fiber.Ctx) error {
+	var newUrlData model.ViewUrlData
 	form, err := c.MultipartForm()
 	if err != nil {
 		log.Fatalf("Error parsing provided data for shortenURL: %v", err)

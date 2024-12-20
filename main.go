@@ -6,10 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/gofiber/fiber/v2"
-
 	// "github.com/go-redis/redis/v8"
-
-	"go.uber.org/zap"
 )
 
 // TableBasics encapsulates the Amazon DynamoDB service actions.
@@ -19,7 +16,6 @@ type TableBasics struct {
 	TableName      string
 }
 
-var logger *zap.Logger
 var basics TableBasics
 
 const (
@@ -28,6 +24,7 @@ const (
 
 func main() {
 	app := fiber.New()
+
 	fmt.Println("Server started")
 
 	urlsRoutes := app.Group("/urls")

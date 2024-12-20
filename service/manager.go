@@ -9,6 +9,7 @@ import (
 
 type ServiceManager struct {
 	UrlsService *UrlsWebService
+	HashService *HashingService
 }
 
 // NewServiceManager creates new service manager
@@ -19,5 +20,6 @@ func NewServiceManager(ctx *fiber.Ctx, store *store.Store) (*ServiceManager, err
 
 	return &ServiceManager{
 		UrlsService: NewUrlsWebService(ctx, store),
+		HashService: NewHashingService(ctx),
 	}, nil
 }
