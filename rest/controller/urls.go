@@ -1,9 +1,11 @@
 package controller
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
+	"url-shortener/logger"
 	"url-shortener/model"
 	"url-shortener/service"
 	"url-shortener/utils"
@@ -13,18 +15,17 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/gofiber/fiber/v2"
-	"go.uber.org/zap"
 )
 
 // Urls Controller
 type UrlsController struct {
-	ctx      *fiber.Ctx
+	ctx      context.Context
 	services *service.ServiceManager
-	logger   *zap.Logger
+	logger   *logger.Logger
 }
 
 // Creates a new Urls Controller
-func NewUrlsController(ctx *fiber.Ctx, services *service.ServiceManager, logger *zap.Logger) *UrlsController {
+func NewUrlsController(ctx context.Context, services *service.ServiceManager, logger *logger.Logger) *UrlsController {
 	return &UrlsController{
 		ctx:      ctx,
 		services: services,
@@ -55,7 +56,7 @@ func (cnt *UrlsController) ShortenUrl(c *fiber.Ctx) error {
 	nowPlusMonth := time.Now().AddDate(0, 1, 0).Format(time.RFC3339)
 	// put valid in db
 	// TODO: short data xxHash creation
-	urlData := model.UrlData{
+	urlData := model.ViewUrlData{
 		ShortUrl:    "short-" + time.Now().Format(time.RFC3339),
 		OriginalUrl: long_url[0],
 		ExpiresAt:   nowPlusMonth,

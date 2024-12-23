@@ -1,18 +1,17 @@
 package service
 
 import (
-	"github.com/gofiber/fiber/v2"
-
+	"context"
 	"url-shortener/model"
 	"url-shortener/store"
 )
 
 type UrlsWebService struct {
-	ctx   *fiber.Ctx
+	ctx   context.Context
 	store *store.Store
 }
 
-func NewUrlsWebService(ctx *fiber.Ctx, store *store.Store) *UrlsWebService {
+func NewUrlsWebService(ctx context.Context, store *store.Store) *UrlsWebService {
 	return &UrlsWebService{
 		ctx,
 		store,
@@ -20,21 +19,21 @@ func NewUrlsWebService(ctx *fiber.Ctx, store *store.Store) *UrlsWebService {
 }
 
 // GetUrl
-func (service *UrlsWebService) GetUrl(ctx *fiber.Ctx, shortUrl string) *model.UrlData {
+func (service *UrlsWebService) GetUrl(ctx context.Context, shortUrl string) *model.ViewUrlData {
 	// TODO: move logic from controller
 	panic("Not implemented")
 }
 
-func (service *UrlsWebService) CreateUrl(ctx *fiber.Ctx, obj *model.UrlData) (*model.UrlData, error) {
+func (service *UrlsWebService) CreateUrl(ctx context.Context, obj *model.ViewUrlData) (*model.ViewUrlData, error) {
 	// TODO: move logic from controller
 	panic("Not implemented")
 }
 
 // TODO:
-func (service *UrlsWebService) UpdateUrl(ctx *fiber.Ctx, obj *model.UrlData) (*model.UrlData, error) {
+func (service *UrlsWebService) UpdateUrl(ctx context.Context, obj *model.ViewUrlData) (*model.ViewUrlData, error) {
 	panic("Not implemented")
 }
 
-func (service *UrlsWebService) DeleteUrl(ctx *fiber.Ctx, shortUrl string) error {
+func (service *UrlsWebService) DeleteUrl(ctx context.Context, shortUrl string) error {
 	panic("Not implemented")
 }

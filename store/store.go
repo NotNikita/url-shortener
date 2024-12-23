@@ -6,7 +6,6 @@ import (
 	awsConfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
-	"github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
 
 	appConfig "url-shortener/config"
@@ -19,10 +18,10 @@ import (
 type Store struct {
 	DynamoDbClient *dynamodb.Client
 
-	Urls UrlsRepo
+	Urls *awsStore.UrlsRepo
 }
 
-func NewStore(ctx *fiber.Ctx) (*Store, error) {
+func NewStore(ctx context.Context) (*Store, error) {
 	appCfg := appConfig.Get()
 	logger := logger.Get()
 	// Load AWS configuration with credentials provider

@@ -21,6 +21,26 @@ type ViewUrlData struct {
 	ExpiresAt   string `json:"expiresAt" validate:"required"`
 }
 
+// Converts ViewUrlData to DBUrlData
+func (urlData *ViewUrlData) ToDB() *DBUrlData {
+	return &DBUrlData{
+		ShortUrl:    urlData.ShortUrl,
+		OriginalUrl: urlData.OriginalUrl,
+		CreatedAt:   urlData.CreatedAt,
+		ExpiresAt:   urlData.ExpiresAt,
+	}
+}
+
+// Converts DBUrlData to ViewUrlData
+func (urlDB *DBUrlData) ToView() *ViewUrlData {
+	return &ViewUrlData{
+		ShortUrl:    urlDB.ShortUrl,
+		OriginalUrl: urlDB.OriginalUrl,
+		CreatedAt:   urlDB.CreatedAt,
+		ExpiresAt:   urlDB.ExpiresAt,
+	}
+}
+
 func (urlData DBUrlData) GeyKey() map[string]types.AttributeValue {
 	shortUrl, err := attributevalue.Marshal(urlData.ShortUrl)
 	if err != nil {

@@ -5,16 +5,21 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
 	"sync"
+	"time"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/kelseyhightower/envconfig"
 )
 
 type Config struct {
-	LogLevel     string `envconfig:"LOG_LEVEL"`
-	AwsAccessKey string `envconfig:"AWS_ACCESS_KEY_ID"`
-	AwsSecretKey string `envconfig:"AWS_SECRET_ACCESS_KEY"`
-	AwsRegion    string `envconfig:"AWS_REGION"`
+	LogLevel           string `envconfig:"LOG_LEVEL"`
+	ServerReadTimeout  string `envconfig:"SERVER_READ_TIMEOUT"`
+	ServerWriteTimeout string `envconfig:"SERVER_WRITE_TIMEOUT"`
+	AwsAccessKey       string `envconfig:"AWS_ACCESS_KEY_ID"`
+	AwsSecretKey       string `envconfig:"AWS_SECRET_ACCESS_KEY"`
+	AwsRegion          string `envconfig:"AWS_REGION"`
 }
 
 var (
@@ -38,4 +43,18 @@ func Get() *Config {
 		},
 	)
 	return &config
+}
+
+func GetFiberConfig() fiber.Config {
+	appConfig := Get()
+
+	timeToDur := func(configValue string) time.Duration {
+		intValue, _ := strconv.Atoi(configValue)
+		return time.Second * time.Duration(intValue)
+	}
+
+	return fiber.Config{
+		ReadTimeout:  timeToDur(appConfig.ServerReadTimeout),
+		WriteTimeout: timeToDur(appConfig.ServerWriteTimeout),
+	}
 }

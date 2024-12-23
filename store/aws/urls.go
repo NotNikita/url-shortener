@@ -18,18 +18,18 @@ func NewUrlsRepo(client *dynamodb.Client) *UrlsRepo {
 	}
 }
 
-func (repo *UrlsRepo) GetUrl(ctx *fiber.Ctx, shortUrl string) *model.UrlData {
+func (repo *UrlsRepo) GetUrl(ctx *fiber.Ctx, shortUrl string) *model.DBUrlData {
 	// TODO: move logic from controller
 	panic("Not implemented")
 }
 
-func (repo *UrlsRepo) CreateUrl(ctx *fiber.Ctx, obj *model.UrlData) (*model.UrlData, error) {
+func (repo *UrlsRepo) CreateUrl(ctx *fiber.Ctx, obj *model.DBUrlData) (*model.DBUrlData, error) {
 	// TODO: move logic from controller
 	panic("Not implemented")
 }
 
 // TODO:
-func (repo *UrlsRepo) UpdateUrl(ctx *fiber.Ctx, obj *model.UrlData) (*model.UrlData, error) {
+func (repo *UrlsRepo) UpdateUrl(ctx *fiber.Ctx, obj *model.DBUrlData) (*model.DBUrlData, error) {
 	panic("Not implemented")
 }
 

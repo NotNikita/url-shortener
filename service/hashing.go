@@ -1,11 +1,11 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"log"
 	"math/rand"
 
-	"github.com/gofiber/fiber/v2"
 	"github.com/zeebo/xxh3"
 )
 
@@ -15,11 +15,11 @@ const (
 )
 
 type HashingService struct {
-	ctx    *fiber.Ctx
+	ctx    context.Context
 	hasher *xxh3.Hasher
 }
 
-func NewHashingService(ctx *fiber.Ctx) *HashingService {
+func NewHashingService(ctx context.Context) *HashingService {
 	return &HashingService{
 		ctx:    ctx,
 		hasher: xxh3.New(),
@@ -29,7 +29,7 @@ func NewHashingService(ctx *fiber.Ctx) *HashingService {
 // TODO: make this as standalone routine
 // that will start running after server will be up
 // and it will be reading tasks from queue and return shortUrls
-func (service *HashingService) GenerateXXHash3BasedOnOriginURL(ctx *fiber.Ctx, originUrl string) (string, error) {
+func (service *HashingService) GenerateXXHash3BasedOnOriginURL(ctx context.Context, originUrl string) (string, error) {
 	// generating salt
 	salt := generateSalt(10)
 	saltedInput := salt + originUrl

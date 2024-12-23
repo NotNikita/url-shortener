@@ -8,9 +8,9 @@ import (
 
 // Urls store is store for urls
 type UrlsRepo interface {
-	GetUrl(*fiber.Ctx, string) *model.UrlData
-	CreateUrl(*fiber.Ctx, *model.UrlData) (*model.UrlData, error)
+	GetUrl(*fiber.Ctx, string) *model.DBUrlData
+	CreateUrl(*fiber.Ctx, *model.DBUrlData) (*model.DBUrlData, error)
 	// TODO:
-	UpdateUrl(*fiber.Ctx, *model.UrlData) (*model.UrlData, error)
+	UpdateUrl(*fiber.Ctx, *model.DBUrlData) (*model.DBUrlData, error)
 	DeleteUrl(*fiber.Ctx, string) error
 }
