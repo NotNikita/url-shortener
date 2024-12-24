@@ -36,7 +36,6 @@ func (service *UrlsWebService) GetUrl(ctx context.Context, shortUrl string) (*mo
 
 // Shorten original URL
 func (service *UrlsWebService) CreateUrl(ctx context.Context, obj *model.ViewUrlData) (*model.ViewUrlData, error) {
-	// Generating short code:
 	shortCode, err := service.hashingService.GenerateXXHash3BasedOnOriginURL(ctx, obj.OriginalUrl)
 	if err != nil {
 		return nil, errors.Wrap(err, "service.urls.CreateUrl")

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"url-shortener/config"
 	"url-shortener/logger"
@@ -13,18 +14,15 @@ import (
 	"url-shortener/service"
 	"url-shortener/store"
 
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/gofiber/fiber/v2"
+	"github.com/patrickmn/go-cache"
 	"go.uber.org/zap"
 	// "github.com/go-redis/redis/v8"
 )
 
-// TableBasics encapsulates the Amazon DynamoDB service actions.
-// Contains a DynamoDB service client that is used to act on the specified table.
-type TableBasics struct {
-	DynamoDbClient *dynamodb.Client
-	TableName      string
-}
+var (
+	memcache *cache.Cache
+)
 
 // @title Url Shortener
 // @version 1.0
@@ -38,6 +36,11 @@ func main() {
 	config.Get()
 	fiberConf := config.GetFiberConfig()
 	l := logger.Get()
+
+	// Init memcache
+	// Create a cache with a default expiration time of 5 minutes, and which
+	// purges expired items every 10 minutes
+	memcache = cache.New(5*time.Minute, 10*time.Minute)
 
 	// Init repository store
 	store, err := store.NewStore(ctx)
@@ -53,7 +56,7 @@ func main() {
 
 	// Init controllers
 	urlsController := controller.NewUrlsController(
-		ctx, serviceManager, l,
+		ctx, serviceManager, l, memcache,
 	)
 
 	// Init fiber instance
@@ -67,7 +70,7 @@ func main() {
 	// Routes
 	route.SwaggerRoutes(app)
 	route.PublicRoutes(app)
-	route.PrivateRoutes(app, urlsController)
+	route.PrivateRoutes(app, memcache, urlsController)
 
 	// Start server
 	log.Fatal(app.Listen(":3000"))

@@ -7,10 +7,12 @@ import (
 	"time"
 	"url-shortener/logger"
 	"url-shortener/model"
+	"url-shortener/rest/middleware"
 	"url-shortener/service"
 	"url-shortener/utils"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/patrickmn/go-cache"
 )
 
 // Urls Controller
@@ -18,14 +20,16 @@ type UrlsController struct {
 	ctx      context.Context
 	services *service.ServiceManager
 	logger   *logger.Logger
+	cache    *cache.Cache
 }
 
 // Creates a new Urls Controller
-func NewUrlsController(ctx context.Context, services *service.ServiceManager, logger *logger.Logger) *UrlsController {
+func NewUrlsController(ctx context.Context, services *service.ServiceManager, logger *logger.Logger, cache *cache.Cache) *UrlsController {
 	return &UrlsController{
 		ctx:      ctx,
 		services: services,
 		logger:   logger,
+		cache:    cache,
 	}
 }
 
@@ -65,6 +69,8 @@ func (cnt *UrlsController) ShortenUrl(c *fiber.Ctx) error {
 		})
 	}
 
+	middleware.PutOriginalUrlInCache(cnt.cache, createdUrl.ShortUrl, long_url[0])
+
 	cnt.logger.Debugln("Created short url: ", createdUrl.ShortUrl)
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"shortenURL": createdUrl.ShortUrl,
@@ -90,6 +96,8 @@ func (cnt *UrlsController) GetOriginalUrl(c *fiber.Ctx) error {
 				"error": "Error while retrieving or finding provided shortcode" + err.Error(),
 			})
 	}
+
+	middleware.PutOriginalUrlInCache(cnt.cache, param, newUrlData.OriginalUrl)
 
 	return c.Redirect(newUrlData.OriginalUrl, fiber.StatusFound)
 }
