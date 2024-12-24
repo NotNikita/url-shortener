@@ -26,9 +26,6 @@ func NewHashingService(ctx context.Context) *HashingService {
 	}
 }
 
-// TODO: make this as standalone routine
-// that will start running after server will be up
-// and it will be reading tasks from queue and return shortUrls
 func (service *HashingService) GenerateXXHash3BasedOnOriginURL(ctx context.Context, originUrl string) (string, error) {
 	// generating salt
 	salt := generateSalt(10)
@@ -47,7 +44,7 @@ func (service *HashingService) GenerateXXHash3BasedOnOriginURL(ctx context.Conte
 	// get shorturl of desired length
 	if len(base62Hash) > SHORT_URL_LENGTH {
 		result := base62Hash[:SHORT_URL_LENGTH]
-		log.Printf("Url <" + originUrl + "> was hashed into <" + result + ">")
+		log.Printf("Url <%v> was hashed into <%v>", originUrl, result)
 		return result, nil
 	}
 

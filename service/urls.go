@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"fmt"
+
 	"url-shortener/model"
 	"url-shortener/store"
 
@@ -29,7 +29,6 @@ func (service *UrlsWebService) GetUrl(ctx context.Context, shortUrl string) (*mo
 	if err != nil {
 		return nil, errors.Wrap(err, "service.urls.GetUrl")
 	}
-	fmt.Println("retrieved object of url", dbUrlData, *dbUrlData)
 
 	return dbUrlData.ToView(), nil
 }
@@ -46,8 +45,6 @@ func (service *UrlsWebService) CreateUrl(ctx context.Context, obj *model.ViewUrl
 	if err != nil {
 		return nil, errors.Wrap(err, "service.urls.CreateUrl")
 	}
-	fmt.Println("before", dbUrlData)
-	fmt.Println("after", dbUrlData.ToView())
 
 	return dbUrlData.ToView(), nil
 }

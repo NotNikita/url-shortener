@@ -3,7 +3,6 @@ package config
 import (
 	// We cant use zap.Logger as this is the second file to be called on start
 	"encoding/json"
-	"fmt"
 	"log"
 	"strconv"
 	"sync"
@@ -42,11 +41,10 @@ func Get() *Config {
 			if err != nil {
 				log.Fatalf("Error loading env variables from .env or exported env variables: %v", err)
 			}
-			configBytes, err := json.MarshalIndent(config, "", "  ")
+			_, err = json.MarshalIndent(config, "", "  ")
 			if err != nil {
 				log.Fatalf("AWS credentials or region not set in .env file")
 			}
-			fmt.Println("Configuration:", string(configBytes))
 		},
 	)
 	return &config

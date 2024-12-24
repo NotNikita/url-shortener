@@ -3,6 +3,7 @@ package aws
 import (
 	"context"
 	"log"
+
 	"url-shortener/model"
 
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
@@ -54,7 +55,6 @@ func (repo *UrlsRepo) GetUrl(ctx context.Context, shortUrl string) (*model.DBUrl
 
 func (repo *UrlsRepo) CreateUrl(ctx context.Context, obj *model.DBUrlData) (*model.DBUrlData, error) {
 	preparedData, err := attributevalue.MarshalMap(obj)
-
 	if err != nil {
 		log.Printf("Failed to marshal DBUrlData")
 		return nil, errors.Wrap(err, "Failed to marshal DBUrlData")

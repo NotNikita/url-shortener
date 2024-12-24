@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 
-	"github.com/pkg/errors"
-
 	"url-shortener/store"
+
+	"github.com/pkg/errors"
 )
 
 type ServiceManager struct {

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"url-shortener/config"
+	_ "url-shortener/docs"
 	"url-shortener/logger"
 	"url-shortener/rest/controller"
 	"url-shortener/rest/middleware"
@@ -17,7 +18,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/patrickmn/go-cache"
 	"go.uber.org/zap"
-	// "github.com/go-redis/redis/v8"
 )
 
 var (
@@ -27,7 +27,9 @@ var (
 // @title Url Shortener
 // @version 1.0
 // @description API creating and managing short links
-
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+// @host localhost:3000
 // @BasePath /api/v1
 
 func main() {
@@ -38,8 +40,7 @@ func main() {
 	l := logger.Get()
 
 	// Init memcache
-	// Create a cache with a default expiration time of 5 minutes, and which
-	// purges expired items every 10 minutes
+	// Expiration: 5 minutes, Purges expired items every 10 minutes
 	memcache = cache.New(5*time.Minute, 10*time.Minute)
 
 	// Init repository store

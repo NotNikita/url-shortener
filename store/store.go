@@ -3,22 +3,21 @@ package store
 import (
 	"context"
 
+	appConfig "url-shortener/config"
+	"url-shortener/logger"
+	awsStore "url-shortener/store/aws"
+
 	awsConfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"go.uber.org/zap"
-
-	appConfig "url-shortener/config"
-	"url-shortener/logger"
-	awsStore "url-shortener/store/aws"
 )
 
 // Store encapsulates the Amazon DynamoDB service actions.
 // Contains a DynamoDB service client that is used to act on the specified table.
 type Store struct {
 	DynamoDbClient *dynamodb.Client
-
-	Urls *awsStore.UrlsRepo
+	Urls           *awsStore.UrlsRepo
 }
 
 func NewStore(ctx context.Context) (*Store, error) {

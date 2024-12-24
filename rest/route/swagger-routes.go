@@ -1,10 +1,11 @@
 package route
 
 import (
-	swagger "github.com/arsmn/fiber-swagger/v2"
 	"github.com/gofiber/fiber/v2"
+	swagger "github.com/gofiber/swagger" // swagger handler
 )
 
+// https://github.com/gofiber/swagger?tab=readme-ov-file#canonical-example
 func SwaggerRoutes(a *fiber.App) {
 	group := a.Group("/swagger")
 

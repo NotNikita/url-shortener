@@ -2,9 +2,8 @@ package controller
 
 import (
 	"context"
-	"fmt"
-	"log"
 	"time"
+
 	"url-shortener/logger"
 	"url-shortener/model"
 	"url-shortener/rest/middleware"
@@ -13,6 +12,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/patrickmn/go-cache"
+	"go.uber.org/zap"
 )
 
 // Urls Controller
@@ -34,21 +34,31 @@ func NewUrlsController(ctx context.Context, services *service.ServiceManager, lo
 }
 
 // Interface of UrlsController: shorten a given url
+// @Summary Shorten a URL
+// @Description Shortens a given URL and returns the shortened URL
+// @Tags URLs
+// @Accept multipart/form-data
+// @Produce json
+// @Param long_url formData string true "Long URL"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /shorten [post]
 func (cnt *UrlsController) ShortenUrl(c *fiber.Ctx) error {
 	var newUrlData model.ViewUrlData
 	form, err := c.MultipartForm()
 	if err != nil {
-		log.Fatalf("Error parsing provided data for shortenURL: %v", err)
+		cnt.logger.Debugln("Error parsing provided data for shortenURL: %v", zap.Error(err))
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Failed to parse form: " + err.Error(),
 		})
 	}
 
-	long_url := form.Value["long_url"]
-	if len(long_url) == 0 || !utils.IsValidUrl(long_url[0]) {
-		log.Fatalf("Error when validating provided url to shorten")
+	longUrl := form.Value["long_url"]
+	if len(longUrl) == 0 || !utils.IsValidUrl(longUrl[0]) {
+		cnt.logger.Debugln("Error when validating provided url to shorten")
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Failed to validate url: " + err.Error(),
+			"error": "Failed to validate url",
 		})
 	}
 
@@ -56,33 +66,42 @@ func (cnt *UrlsController) ShortenUrl(c *fiber.Ctx) error {
 	nowPlusMonth := time.Now().AddDate(0, 1, 0).Format(time.RFC3339)
 	newUrlData = model.ViewUrlData{
 		ShortUrl:    "",
-		OriginalUrl: long_url[0],
+		OriginalUrl: longUrl[0],
 		ExpiresAt:   nowPlusMonth,
 		CreatedAt:   now,
 	}
-	fmt.Println("urlData", newUrlData)
+
 	createdUrl, err := cnt.services.UrlsService.CreateUrl(c.Context(), &newUrlData)
 	if err != nil {
-		log.Printf("500: Failed to shorten url %s", long_url[0])
+		cnt.logger.Debug("Failed to shorten URL", zap.String("long_url", longUrl[0]), zap.Error(err))
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to shorten your url: " + err.Error(),
 		})
 	}
 
-	middleware.PutOriginalUrlInCache(cnt.cache, createdUrl.ShortUrl, long_url[0])
+	middleware.PutOriginalUrlInCache(cnt.cache, createdUrl.ShortUrl, longUrl[0])
 
-	cnt.logger.Debugln("Created short url: ", createdUrl.ShortUrl)
+	cnt.logger.Debugln("Created short url: ", zap.String("short_url", createdUrl.ShortUrl))
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"shortenURL": createdUrl.ShortUrl,
 	})
 }
 
 // Interface of UrlsController: get original url for provided short and redirect
+// @Summary Get original URL
+// @Description Retrieves the original URL for a given short code and redirects
+// @Tags URLs
+// @Produce json
+// @Param shortCode path string true "Short Code"
+// @Success 302
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /{shortCode} [get]
 func (cnt *UrlsController) GetOriginalUrl(c *fiber.Ctx) error {
 	var newUrlData *model.ViewUrlData
 	param := c.Params("shortCode")
 	if len(param) < 1 { // TODO: HASH_LENGTH {
-		log.Printf("Error when retrieving shortCode from request url")
+		cnt.logger.Debugln("Error when retrieving shortCode from request url")
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Failed to retrieve shortCode in getURL function",
 		})
@@ -90,7 +109,7 @@ func (cnt *UrlsController) GetOriginalUrl(c *fiber.Ctx) error {
 
 	newUrlData, err := cnt.services.UrlsService.GetUrl(c.Context(), param)
 	if err != nil {
-		log.Printf("Failed to retrieve shortcode from database")
+		cnt.logger.Debugln("Failed to retrieve shortcode from database")
 		return c.Status(fiber.StatusInternalServerError).JSON(
 			fiber.Map{
 				"error": "Error while retrieving or finding provided shortcode" + err.Error(),

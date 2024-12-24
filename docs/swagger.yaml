@@ -1,0 +1,87 @@
+basePath: /api/v1
+host: localhost:3000
+info:
+  contact: {}
+  description: API creating and managing short links
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Url Shortener
+  version: "1.0"
+paths:
+  /{shortCode}:
+    get:
+      description: Retrieves the original URL for a given short code and redirects
+      parameters:
+      - description: Short Code
+        in: path
+        name: shortCode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "302":
+          description: Found
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get original URL
+      tags:
+      - URLs
+  /ping:
+    get:
+      description: Should return body with status of "pong"
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Checks if server is running
+      tags:
+      - Public
+  /shorten:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Shortens a given URL and returns the shortened URL
+      parameters:
+      - description: Long URL
+        in: formData
+        name: long_url
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Shorten a URL
+      tags:
+      - URLs
+swagger: "2.0"
