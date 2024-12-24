@@ -10,10 +10,6 @@ import (
 	"url-shortener/service"
 	"url-shortener/utils"
 
-	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -54,58 +50,30 @@ func (cnt *UrlsController) ShortenUrl(c *fiber.Ctx) error {
 
 	now := time.Now().Format(time.RFC3339)
 	nowPlusMonth := time.Now().AddDate(0, 1, 0).Format(time.RFC3339)
-	// put valid in db
-	// TODO: short data xxHash creation
-	urlData := model.ViewUrlData{
-		ShortUrl:    "short-" + time.Now().Format(time.RFC3339),
+	newUrlData = model.ViewUrlData{
+		ShortUrl:    "",
 		OriginalUrl: long_url[0],
 		ExpiresAt:   nowPlusMonth,
 		CreatedAt:   now,
 	}
-	fmt.Println("urlData", urlData)
-
-	preparedData, err := attributevalue.MarshalMap(urlData)
-	fmt.Println("preparedData", preparedData)
-
+	fmt.Println("urlData", newUrlData)
+	createdUrl, err := cnt.services.UrlsService.CreateUrl(c.Context(), &newUrlData)
 	if err != nil {
-		log.Fatalf("Failed to prepare data for database")
+		log.Printf("500: Failed to shorten url %s", long_url[0])
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to prepare data for database: " + err.Error(),
+			"error": "Failed to shorten your url: " + err.Error(),
 		})
 	}
 
-	_, err = basics.DynamoDbClient.PutItem(c.Context(), &dynamodb.PutItemInput{
-		TableName: aws.String(basics.TableName),
-		Item:      preparedData,
-	})
-	if err != nil {
-		log.Fatalf("Failed to add item to ShortUrls table: %v\nURL Data: %+v\nPrepared Data: %+v", err, urlData, preparedData)
-
-		// Handle specific error types if needed
-		if awsErr, ok := err.(awserr.Error); ok {
-			switch awsErr.Code() {
-			case "ProvisionedThroughputExceededException":
-				log.Fatalf("Provisioned throughput exceeded for table: %s", basics.TableName)
-				// Implement backoff or rate limiting strategy
-			case "AccessDeniedException":
-				log.Fatalf("Access denied for table: %s. Check IAM permissions.", basics.TableName)
-			default:
-				log.Fatalf("Unknown error: %v", awsErr)
-			}
-		}
-
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to add item to ShortUrls table: " + err.Error(),
-		})
-	}
-
+	cnt.logger.Debugln("Created short url: ", createdUrl.ShortUrl)
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"shortenURL": urlData.ShortUrl,
+		"shortenURL": createdUrl.ShortUrl,
 	})
 }
 
 // Interface of UrlsController: get original url for provided short and redirect
 func (cnt *UrlsController) GetOriginalUrl(c *fiber.Ctx) error {
+	var newUrlData *model.ViewUrlData
 	param := c.Params("shortCode")
 	if len(param) < 1 { // TODO: HASH_LENGTH {
 		log.Printf("Error when retrieving shortCode from request url")
@@ -114,33 +82,14 @@ func (cnt *UrlsController) GetOriginalUrl(c *fiber.Ctx) error {
 		})
 	}
 
-	urlData := model.UrlData{
-		ShortUrl: param,
-	}
-	response, err := basics.DynamoDbClient.GetItem(c.Context(), &dynamodb.GetItemInput{
-		TableName: aws.String(basics.TableName),
-		Key:       urlData.GeyKey(),
-	})
+	newUrlData, err := cnt.services.UrlsService.GetUrl(c.Context(), param)
 	if err != nil {
-		log.Printf("Error when retrieving urlData from db in getURL: %v", err)
+		log.Printf("Failed to retrieve shortcode from database")
 		return c.Status(fiber.StatusInternalServerError).JSON(
 			fiber.Map{
-				"error": "Failed to retrieve urlData from DB in getURL function",
+				"error": "Error while retrieving or finding provided shortcode" + err.Error(),
 			})
 	}
 
-	if response.Item == nil {
-		log.Printf("No item found in DB for shortCode: %s", param)
-		return c.Status(fiber.StatusNotFound).JSON(
-			fiber.Map{
-				"error": "No URL found for the provided shortCode",
-			})
-	}
-
-	err = attributevalue.UnmarshalMap(response.Item, &urlData)
-	if err != nil {
-		log.Printf("Couldn't unmarshal response. Here's why: %v\n", err)
-	}
-
-	return c.Redirect(urlData.OriginalUrl, fiber.StatusFound)
+	return c.Redirect(newUrlData.OriginalUrl, fiber.StatusFound)
 }

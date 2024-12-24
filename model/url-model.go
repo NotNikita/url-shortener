@@ -7,8 +7,8 @@ import (
 
 // For DynamoDB level
 type DBUrlData struct {
-	ShortUrl    string `dynamodbav:"shortCode"`
-	OriginalUrl string `dynamodbav:"originalURL"`
+	ShortCode   string `dynamodbav:"shortCode"`
+	OriginalURL string `dynamodbav:"originalURL"`
 	CreatedAt   string `dynamodbav:"createdAt"`
 	ExpiresAt   string `dynamodbav:"expiresAt"`
 }
@@ -24,8 +24,8 @@ type ViewUrlData struct {
 // Converts ViewUrlData to DBUrlData
 func (urlData *ViewUrlData) ToDB() *DBUrlData {
 	return &DBUrlData{
-		ShortUrl:    urlData.ShortUrl,
-		OriginalUrl: urlData.OriginalUrl,
+		ShortCode:   urlData.ShortUrl,
+		OriginalURL: urlData.OriginalUrl,
 		CreatedAt:   urlData.CreatedAt,
 		ExpiresAt:   urlData.ExpiresAt,
 	}
@@ -34,15 +34,19 @@ func (urlData *ViewUrlData) ToDB() *DBUrlData {
 // Converts DBUrlData to ViewUrlData
 func (urlDB *DBUrlData) ToView() *ViewUrlData {
 	return &ViewUrlData{
-		ShortUrl:    urlDB.ShortUrl,
-		OriginalUrl: urlDB.OriginalUrl,
+		ShortUrl:    urlDB.ShortCode,
+		OriginalUrl: urlDB.OriginalURL,
 		CreatedAt:   urlDB.CreatedAt,
 		ExpiresAt:   urlDB.ExpiresAt,
 	}
 }
 
-func (urlData DBUrlData) GeyKey() map[string]types.AttributeValue {
-	shortUrl, err := attributevalue.Marshal(urlData.ShortUrl)
+func (urlData ViewUrlData) GeyKey() map[string]types.AttributeValue {
+	return MarshalShortUrl(urlData.ShortUrl)
+}
+
+func MarshalShortUrl(url string) map[string]types.AttributeValue {
+	shortUrl, err := attributevalue.Marshal(url)
 	if err != nil {
 		panic(err)
 	}

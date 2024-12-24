@@ -47,7 +47,8 @@ func (service *HashingService) GenerateXXHash3BasedOnOriginURL(ctx context.Conte
 	// get shorturl of desired length
 	if len(base62Hash) > SHORT_URL_LENGTH {
 		result := base62Hash[:SHORT_URL_LENGTH]
-		return result, errors.New("Url <" + originUrl + "> was hashed into <" + result + ">")
+		log.Printf("Url <" + originUrl + "> was hashed into <" + result + ">")
+		return result, nil
 	}
 
 	log.Printf("Error when hashing following url: %s", originUrl)

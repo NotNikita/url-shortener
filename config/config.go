@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
 )
 
@@ -30,10 +31,16 @@ var (
 func Get() *Config {
 	once.Do(
 		func() {
-			// Load environment variables from .env
-			err := envconfig.Process("", &config)
+			// Load environment variables from .env file
+			err := godotenv.Load(".env") // Specify the correct path to your .env file
 			if err != nil {
 				log.Fatalf("Error loading .env file: %v", err)
+			}
+
+			// Load environment variables from .env
+			err = envconfig.Process("", &config)
+			if err != nil {
+				log.Fatalf("Error loading env variables from .env or exported env variables: %v", err)
 			}
 			configBytes, err := json.MarshalIndent(config, "", "  ")
 			if err != nil {

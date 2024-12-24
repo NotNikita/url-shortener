@@ -19,8 +19,10 @@ func NewServiceManager(ctx context.Context, store *store.Store) (*ServiceManager
 		return nil, errors.New("No store provided")
 	}
 
+	hashService := NewHashingService(ctx)
+
 	return &ServiceManager{
-		UrlsService: NewUrlsWebService(ctx, store),
-		HashService: NewHashingService(ctx),
+		UrlsService: NewUrlsWebService(ctx, store, hashService),
+		HashService: hashService,
 	}, nil
 }

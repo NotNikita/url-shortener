@@ -26,11 +26,11 @@ type TableBasics struct {
 	TableName      string
 }
 
-var basics TableBasics
+// @title Url Shortener
+// @version 1.0
+// @description API creating and managing short links
 
-const (
-	HASH_LENGTH = 6
-)
+// @BasePath /api/v1
 
 func main() {
 	ctx := context.Background()
