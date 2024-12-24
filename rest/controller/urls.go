@@ -73,7 +73,7 @@ func (cnt *UrlsController) ShortenUrl(c *fiber.Ctx) error {
 
 	createdUrl, err := cnt.services.UrlsService.CreateUrl(c.Context(), &newUrlData)
 	if err != nil {
-		cnt.logger.Debug("Failed to shorten URL", zap.String("long_url", longUrl[0]), zap.Error(err))
+		cnt.logger.Debugln("Failed to shorten URL", zap.String("long_url", longUrl[0]), zap.Error(err))
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to shorten your url: " + err.Error(),
 		})
@@ -100,7 +100,7 @@ func (cnt *UrlsController) ShortenUrl(c *fiber.Ctx) error {
 func (cnt *UrlsController) GetOriginalUrl(c *fiber.Ctx) error {
 	var newUrlData *model.ViewUrlData
 	param := c.Params("shortCode")
-	if len(param) < 1 { // TODO: HASH_LENGTH {
+	if len(param) < 1 {
 		cnt.logger.Debugln("Error when retrieving shortCode from request url")
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Failed to retrieve shortCode in getURL function",
@@ -119,4 +119,89 @@ func (cnt *UrlsController) GetOriginalUrl(c *fiber.Ctx) error {
 	middleware.PutOriginalUrlInCache(cnt.cache, param, newUrlData.OriginalUrl)
 
 	return c.Redirect(newUrlData.OriginalUrl, fiber.StatusFound)
+}
+
+// Interface of UrlsController: update existing short url with new origin value
+// @Summary Update original URL for short URL
+// @Description Update existing short url with new origin value
+// @Tags URLs
+// @Param shortCode path string true "Short Code"
+// @Success 204
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /{shortCode} [put]
+func (cnt *UrlsController) UpdateUrl(c *fiber.Ctx) error {
+	var newUrlData model.ViewUrlData
+	shortCodeParam := c.Params("shortCode")
+	if len(shortCodeParam) < 1 {
+		cnt.logger.Debugln("Error when retrieving shortCode from request url")
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Failed to retrieve shortCode in getURL function",
+		})
+	}
+
+	form, err := c.MultipartForm()
+	if err != nil {
+		cnt.logger.Debugf("Error parsing provided data for shortenURL: %v", zap.Error(err))
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Failed to parse form: " + err.Error(),
+		})
+	}
+
+	longUrl := form.Value["long_url"]
+	if len(longUrl) == 0 || !utils.IsValidUrl(longUrl[0]) {
+		cnt.logger.Debugln("Error when validating provided origin url to update")
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Failed to validate origin url",
+		})
+	}
+	newUrlData = model.ViewUrlData{
+		ShortUrl:    shortCodeParam,
+		OriginalUrl: longUrl[0],
+		ExpiresAt:   time.Now().AddDate(0, 1, 0).Format(time.RFC3339),
+	}
+
+	updatedUrlData, err := cnt.services.UrlsService.UpdateUrl(c.Context(), &newUrlData)
+	if err != nil {
+		cnt.logger.Debugf("Error while updating url of %v", newUrlData)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to update url",
+		})
+	}
+
+	middleware.PutOriginalUrlInCache(cnt.cache, shortCodeParam, updatedUrlData.OriginalUrl)
+
+	return c.SendStatus(fiber.StatusNoContent)
+}
+
+// Interface of UrlsController: delete existing short url
+// @Summary Delete short URL
+// @Description Delete existing short url
+// @Tags URLs
+// @Param shortCode path string true "Short Code"
+// @Success 204
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /{shortCode} [delete]
+func (cnt *UrlsController) DeleteUrl(c *fiber.Ctx) error {
+	shortCodeParam := c.Params("shortCode")
+	if len(shortCodeParam) < 1 {
+		cnt.logger.Debugln("Error when retrieving shortCode from request url")
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Failed to retrieve shortCode in getURL function",
+		})
+	}
+
+	err := cnt.services.UrlsService.DeleteUrl(c.Context(), shortCodeParam)
+	if err != nil {
+		cnt.logger.Debugln("Failed to delete shortcode from database")
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			fiber.Map{
+				"error": "Error while deleting provided shortcode" + err.Error(),
+			})
+	}
+
+	middleware.EjectOriginalUrlFromCache(cnt.cache, shortCodeParam)
+
+	return c.SendStatus(fiber.StatusNoContent)
 }

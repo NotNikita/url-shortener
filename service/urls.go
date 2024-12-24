@@ -49,13 +49,22 @@ func (service *UrlsWebService) CreateUrl(ctx context.Context, obj *model.ViewUrl
 	return dbUrlData.ToView(), nil
 }
 
-// TODO:
 // Update existing short URL to point to another Origin
 func (service *UrlsWebService) UpdateUrl(ctx context.Context, obj *model.ViewUrlData) (*model.ViewUrlData, error) {
-	panic("Not implemented")
+	dbUrlData, err := service.store.Urls.UpdateUrl(ctx, obj.ToDB())
+	if err != nil {
+		return nil, errors.Wrap(err, "service.urls.UpdateUrl")
+	}
+
+	return dbUrlData.ToView(), nil
 }
 
 // Delete existing short URL
 func (service *UrlsWebService) DeleteUrl(ctx context.Context, shortUrl string) error {
-	panic("Not implemented")
+	err := service.store.Urls.DeleteUrl(ctx, shortUrl)
+	if err != nil {
+		return errors.Wrap(err, "service.urls.DeleteUrl")
+	}
+
+	return nil
 }

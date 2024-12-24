@@ -20,3 +20,7 @@ func VerifyGetOriginalUrl(memcache *cache.Cache) fiber.Handler {
 func PutOriginalUrlInCache(memcache *cache.Cache, shortUrl string, originUrl string) {
 	memcache.Set(shortUrl, originUrl, cache.DefaultExpiration)
 }
+
+func EjectOriginalUrlFromCache(memcache *cache.Cache, shortUrl string) {
+	memcache.Delete(shortUrl)
+}

@@ -10,6 +10,32 @@ info:
   version: "1.0"
 paths:
   /{shortCode}:
+    delete:
+      description: Delete existing short url
+      parameters:
+      - description: Short Code
+        in: path
+        name: shortCode
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete short URL
+      tags:
+      - URLs
     get:
       description: Retrieves the original URL for a given short code and redirects
       parameters:
@@ -36,6 +62,32 @@ paths:
               type: string
             type: object
       summary: Get original URL
+      tags:
+      - URLs
+    put:
+      description: Update existing short url with new origin value
+      parameters:
+      - description: Short Code
+        in: path
+        name: shortCode
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update original URL for short URL
       tags:
       - URLs
   /ping:

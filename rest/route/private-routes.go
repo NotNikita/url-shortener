@@ -15,4 +15,6 @@ func PrivateRoutes(a *fiber.App, cache *cache.Cache, urls *controller.UrlsContro
 	// Url related routes:
 	group.Post("/shorten", urls.ShortenUrl)
 	group.Get("/:shortCode", middleware.VerifyGetOriginalUrl(cache), urls.GetOriginalUrl)
+	group.Put("/:shortCode", urls.UpdateUrl)
+	group.Delete("/:shortCode", urls.DeleteUrl)
 }
