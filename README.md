@@ -31,3 +31,9 @@ TODO (priority):
 9. CDN
 10. Simple Clean-up service
 11. CDN or/and Load balancer between Client and API
+
+# How to run application:
+
+```
+docker-compose up --build
+```

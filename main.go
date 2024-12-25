@@ -74,5 +74,5 @@ func main() {
 	route.PrivateRoutes(app, memcache, urlsController)
 
 	// Start server
-	log.Fatal(app.Listen(":3000"))
+	log.Fatal(app.Listen("0.0.0.0:8080"))
 }
