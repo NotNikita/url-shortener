@@ -6,12 +6,10 @@ import (
 
 	"url-shortener/logger"
 	"url-shortener/model"
-	"url-shortener/rest/middleware"
 	"url-shortener/service"
 	"url-shortener/utils"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/patrickmn/go-cache"
 	"go.uber.org/zap"
 )
 
@@ -20,16 +18,14 @@ type UrlsController struct {
 	ctx      context.Context
 	services *service.ServiceManager
 	logger   *logger.Logger
-	cache    *cache.Cache
 }
 
 // Creates a new Urls Controller
-func NewUrlsController(ctx context.Context, services *service.ServiceManager, logger *logger.Logger, cache *cache.Cache) *UrlsController {
+func NewUrlsController(ctx context.Context, services *service.ServiceManager, logger *logger.Logger) *UrlsController {
 	return &UrlsController{
 		ctx:      ctx,
 		services: services,
 		logger:   logger,
-		cache:    cache,
 	}
 }
 
@@ -79,8 +75,6 @@ func (cnt *UrlsController) ShortenUrl(c *fiber.Ctx) error {
 		})
 	}
 
-	middleware.PutOriginalUrlInCache(cnt.cache, createdUrl.ShortUrl, longUrl[0])
-
 	cnt.logger.Debugln("Created short url: ", zap.String("short_url", createdUrl.ShortUrl))
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"shortenURL": createdUrl.ShortUrl,
@@ -115,8 +109,6 @@ func (cnt *UrlsController) GetOriginalUrl(c *fiber.Ctx) error {
 				"error": "Error while retrieving or finding provided shortcode" + err.Error(),
 			})
 	}
-
-	middleware.PutOriginalUrlInCache(cnt.cache, param, newUrlData.OriginalUrl)
 
 	return c.Redirect(newUrlData.OriginalUrl, fiber.StatusFound)
 }
@@ -161,15 +153,13 @@ func (cnt *UrlsController) UpdateUrl(c *fiber.Ctx) error {
 		ExpiresAt:   time.Now().AddDate(0, 1, 0).Format(time.RFC3339),
 	}
 
-	updatedUrlData, err := cnt.services.UrlsService.UpdateUrl(c.Context(), &newUrlData)
+	_, err = cnt.services.UrlsService.UpdateUrl(c.Context(), &newUrlData)
 	if err != nil {
 		cnt.logger.Debugf("Error while updating url of %v", newUrlData)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to update url",
 		})
 	}
-
-	middleware.PutOriginalUrlInCache(cnt.cache, shortCodeParam, updatedUrlData.OriginalUrl)
 
 	return c.SendStatus(fiber.StatusNoContent)
 }
@@ -200,8 +190,6 @@ func (cnt *UrlsController) DeleteUrl(c *fiber.Ctx) error {
 				"error": "Error while deleting provided shortcode" + err.Error(),
 			})
 	}
-
-	middleware.EjectOriginalUrlFromCache(cnt.cache, shortCodeParam)
 
 	return c.SendStatus(fiber.StatusNoContent)
 }

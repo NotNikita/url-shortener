@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"time"
 
 	"url-shortener/config"
 	_ "url-shortener/docs"
@@ -16,12 +15,7 @@ import (
 	"url-shortener/store"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/patrickmn/go-cache"
 	"go.uber.org/zap"
-)
-
-var (
-	memcache *cache.Cache
 )
 
 // @title Url Shortener
@@ -39,10 +33,6 @@ func main() {
 	fiberConf := config.GetFiberConfig()
 	l := logger.Get()
 
-	// Init memcache
-	// Expiration: 5 minutes, Purges expired items every 10 minutes
-	memcache = cache.New(5*time.Minute, 10*time.Minute)
-
 	// Init repository store
 	store, err := store.NewStore(ctx)
 	if err != nil {
@@ -57,7 +47,7 @@ func main() {
 
 	// Init controllers
 	urlsController := controller.NewUrlsController(
-		ctx, serviceManager, l, memcache,
+		ctx, serviceManager, l,
 	)
 
 	// Init fiber instance
@@ -71,7 +61,7 @@ func main() {
 	// Routes
 	route.SwaggerRoutes(app)
 	route.PublicRoutes(app)
-	route.PrivateRoutes(app, memcache, urlsController)
+	route.PrivateRoutes(app, urlsController)
 
 	// Start server
 	log.Fatal(app.Listen("0.0.0.0:8080"))

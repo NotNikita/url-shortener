@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"url-shortener/model"
+	utility_service "url-shortener/service/utility"
 	"url-shortener/store"
 
 	"github.com/pkg/errors"
@@ -12,24 +13,35 @@ import (
 type UrlsWebService struct {
 	ctx            context.Context
 	store          *store.Store
-	hashingService *HashingService
+	hashingService *utility_service.HashingService
+	cachingService *utility_service.CachingService
 }
 
-func NewUrlsWebService(ctx context.Context, store *store.Store, hashingService *HashingService) *UrlsWebService {
+func NewUrlsWebService(ctx context.Context, store *store.Store, hashingService *utility_service.HashingService, cacheService *utility_service.CachingService) *UrlsWebService {
 	return &UrlsWebService{
 		ctx,
 		store,
 		hashingService,
+		cacheService,
 	}
 }
 
 // Retrieve original URL
 func (service *UrlsWebService) GetUrl(ctx context.Context, shortUrl string) (*model.ViewUrlData, error) {
+	// Checking cache before accessing DB:
+	if cacheRes, ok := service.cachingService.GetCache(shortUrl); ok {
+		return &model.ViewUrlData{
+			OriginalUrl: cacheRes,
+		}, nil
+	}
+
+	// Cache miss, accessing DB:
 	dbUrlData, err := service.store.Urls.GetUrl(ctx, shortUrl)
 	if err != nil {
 		return nil, errors.Wrap(err, "service.urls.GetUrl")
 	}
 
+	service.cachingService.UpdateCache(shortUrl, dbUrlData.OriginalURL)
 	return dbUrlData.ToView(), nil
 }
 
@@ -46,6 +58,7 @@ func (service *UrlsWebService) CreateUrl(ctx context.Context, obj *model.ViewUrl
 		return nil, errors.Wrap(err, "service.urls.CreateUrl")
 	}
 
+	service.cachingService.UpdateCache(dbUrlData.ShortCode, dbUrlData.OriginalURL)
 	return dbUrlData.ToView(), nil
 }
 
@@ -56,6 +69,7 @@ func (service *UrlsWebService) UpdateUrl(ctx context.Context, obj *model.ViewUrl
 		return nil, errors.Wrap(err, "service.urls.UpdateUrl")
 	}
 
+	service.cachingService.UpdateCache(dbUrlData.ShortCode, dbUrlData.OriginalURL)
 	return dbUrlData.ToView(), nil
 }
 
@@ -66,5 +80,6 @@ func (service *UrlsWebService) DeleteUrl(ctx context.Context, shortUrl string) e
 		return errors.Wrap(err, "service.urls.DeleteUrl")
 	}
 
+	service.cachingService.EjectCache(shortUrl)
 	return nil
 }
