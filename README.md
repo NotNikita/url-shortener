@@ -26,7 +26,7 @@ TODO (priority):
 4. ~~Project structure revamped~~
 5. Go-routines and Channels best practices
 6. API deployment on AWS
-7. Redis cache work and it deployment
+7. ~~In-memory cache works~~
 8. FE: Next.js simple UI and deployment
 9. CDN
 10. Simple Clean-up service
@@ -37,3 +37,9 @@ TODO (priority):
 ```
 docker-compose up --build
 ```
+
+# Program design:
+
+## API design
+
+![API design](API%20design.png)
