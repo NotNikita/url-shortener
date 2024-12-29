@@ -43,3 +43,13 @@ docker-compose up --build
 ## API design
 
 ![API design](API%20design.png)
+
+## Frontend
+
+Tech:
+
+- Deno2 runtime
+- Next.js 15 App Router framework
+- RadixUI-theme components
+- ... tanstack-query / zustand
+- ? Auth - clerk
