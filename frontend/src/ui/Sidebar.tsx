@@ -1,23 +1,29 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import {Box, Button, Flex, Text} from '@radix-ui/themes';
-import {EyeOpenIcon} from '@radix-ui/react-icons';
+import {LinkBreak2Icon} from '@radix-ui/react-icons';
 import {SigninButton} from '@/components/SigninButton';
+import {LanguageButton} from '@/components/LanguageButton';
+import {SidebarItem} from '@/components/SidebarItem';
+import {IconQR} from '@/components/Icons/IconQR';
 
-// #1E1E24
-// #92140c
-// #fff8f0
-// #ffcf99
+const menuIconProps = {
+  style: {
+    height: '1.5rem',
+    width: '1.5rem',
+    fill: 'currentColor',
+  },
+};
 
 export const Sidebar = () => {
   return (
     <Flex
-      id='sidebar'
+      data-testid='sidebar'
       direction='column'
       justify='between'
       style={{
         position: 'absolute',
-        backgroundColor: '#1E1E24',
+        backgroundColor: 'var(--gray-a2)',
         top: 0,
         left: 0,
         height: '100vh',
@@ -27,18 +33,8 @@ export const Sidebar = () => {
       }}
     >
       <Box>
-        <Link
-          href='/'
-          className='text-xl transition-colors duration-150 relative text-inherit whitespace-nowrap no-underline'
-        >
-          <Image
-            src='/horizontal-logo.svg'
-            alt='TutMenu logo for sidebar'
-            width={200}
-            height={50}
-            className='block cursor-pointer'
-            priority
-          />
+        <Link href='/'>
+          <Image src='/horizontal-logo.svg' alt='Url shorting logo for sidebar' width={200} height={50} priority />
         </Link>
         <ul
           style={{
@@ -46,60 +42,32 @@ export const Sidebar = () => {
             gap: '20px',
           }}
         >
-          <MenuItems />
-          <MenuItems />
+          <SidebarItem text='Shorten Url' link='/short' icon={<LinkBreak2Icon {...menuIconProps} />} />
+          <SidebarItem text='Create QR' link='/qr-code' icon={<IconQR props={menuIconProps} />} />
         </ul>
       </Box>
 
-      <Box
+      <Flex
+        data-testid='sidebar-bottom'
         style={{
           marginBottom: '1rem',
           width: '100%',
         }}
+        gap='1'
+        direction='column'
       >
         <SigninButton />
-      </Box>
-    </Flex>
-  );
-};
+        <LanguageButton />
 
-const MenuItems = () => {
-  return (
-    <li
-      style={{
-        position: 'relative',
-        listStyleType: 'none',
-        height: '3rem',
-        lineHeight: '3.25rem',
-        width: '100%',
-        margin: '0.8rem auto',
-      }}
-    >
-      <Link href='#'>
-        <Button
-          radius='medium'
-          variant='outline'
-          size='4'
-          style={{
-            color: '#FFF',
-            border: '1px #fff8f0 solid',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-around',
-            textDecoration: 'none',
-            borderRadius: '0.8rem',
-            width: '100%',
-          }}
-        >
-          <EyeOpenIcon
-            style={{
-              height: '1.5rem',
-              width: '1.5rem',
-            }}
-          />
-          <Text style={{}}>Menu item 1</Text>
-        </Button>
-      </Link>
-    </li>
+        <Flex direction='row' gap='3'>
+          <Link href='/privacy-policy'>
+            <Text size='1'>privacy policy</Text>
+          </Link>
+          <Link href='/terms-conditions'>
+            <Text size='1'>terms & conditions</Text>
+          </Link>
+        </Flex>
+      </Flex>
+    </Flex>
   );
 };

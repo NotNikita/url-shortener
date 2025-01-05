@@ -1,7 +1,7 @@
 import type {Metadata} from 'next';
 import {nunito} from '@/app/fonts';
 import {Theme} from '@radix-ui/themes';
-import {ToastContainer} from 'react-toastify';
+import {Bounce, ToastContainer} from 'react-toastify';
 
 import './globals.css';
 import '@radix-ui/themes/styles.css';
@@ -28,8 +28,18 @@ export default function RootLayout({
         <Theme accentColor='crimson' grayColor='gray' panelBackground='solid' scaling='105%'>
           <Sidebar />
           {children}
-
-          <ToastContainer position='bottom-right' />
+          <ToastContainer
+            position='bottom-right'
+            autoClose={2000}
+            hideProgressBar
+            closeOnClick
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme='light'
+            transition={Bounce}
+            icon={false}
+          />
         </Theme>
       </body>
     </html>

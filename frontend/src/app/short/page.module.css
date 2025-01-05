@@ -1,0 +1,86 @@
+.container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-6);
+    max-width: calc(100vw - 240px);
+    margin-left: 240px;
+}
+
+.content {
+    max-width: 800px;
+    width: 100%;
+    text-align: center;
+}
+
+.header {
+    margin-bottom: var(--space-6);
+}
+
+.inputContainer {
+
+}
+
+.inputWrapper {
+    position: relative;
+    flex: 1;
+    line-height: 2;
+}
+
+.icon {
+    position: absolute;
+    left: var(--space-3);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-a8);
+    pointer-events: none;
+}
+
+.inputRoot {
+    padding-left: var(--space-7);
+    height: 100%;
+}
+
+.clearButton {
+    position: absolute;
+    right: var(--space-2);
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.resultContainer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    
+}
+
+.resultLink {
+    background-color: var(--gray-a2);
+    padding: var(--space-3);
+    border-radius: var(--radius-4);
+}
+
+.resultControls {
+    display: flex;
+    gap: var(--space-1);
+    justify-content: space-between;
+}
+
+.resultMiniIcons {
+    display: flex;
+    gap: var(--space-1);
+}
+
+.shortUrl {
+    flex: 1;
+    text-align: left;
+}
+
+.actions {
+    display: flex;
+    gap: var(--space-1);
+}
+
