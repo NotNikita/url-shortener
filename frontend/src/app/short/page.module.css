@@ -58,7 +58,6 @@
 }
 
 .resultLink {
-    background-color: var(--gray-a2);
     padding: var(--space-3);
     border-radius: var(--radius-4);
 }
@@ -77,6 +76,15 @@
 .shortUrl {
     flex: 1;
     text-align: left;
+    color: black;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.shortUrl:hover {
+    cursor: pointer;
+    color: var(--accent-9);
 }
 
 .actions {
