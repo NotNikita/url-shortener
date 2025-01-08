@@ -22,6 +22,7 @@ TODO (priority):
 
 1. ~~DB deploy~~
 2. ~~Zap log service connected~~
+   2.5 Logging on 3 levels: Info, Debug, Error.
 3. ~~Full API finish~~
 4. ~~Project structure revamped~~
 5. Go-routines and Channels best practices
