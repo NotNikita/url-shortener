@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import {Box, Button, Flex, Text} from '@radix-ui/themes';
-import {LinkBreak2Icon} from '@radix-ui/react-icons';
+import {LinkBreak2Icon, ListBulletIcon} from '@radix-ui/react-icons';
 import {SigninButton} from '@/components/SigninButton';
 import {LanguageButton} from '@/components/LanguageButton';
 import {SidebarItem} from '@/components/SidebarItem';
@@ -44,6 +44,7 @@ export const Sidebar = () => {
         >
           <SidebarItem text='Shorten Url' link='/short' icon={<LinkBreak2Icon {...menuIconProps} />} />
           <SidebarItem text='Create QR' link='/qr-code' icon={<IconQR props={menuIconProps} />} />
+          <SidebarItem text='Link tree' link='/qr-code' icon={<ListBulletIcon {...menuIconProps} />} />
         </ul>
       </Box>
 

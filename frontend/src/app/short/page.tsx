@@ -2,13 +2,17 @@
 
 import styles from './page.module.css';
 import {Box, Button, Card, Container, Flex, Heading, IconButton, Text, TextField, Tooltip} from '@radix-ui/themes';
-import {GlobeIcon, Share1Icon, GearIcon, Link2Icon} from '@radix-ui/react-icons';
+import {GlobeIcon, Share1Icon, GearIcon, Link2Icon, Cross1Icon} from '@radix-ui/react-icons';
 import {MainHeading} from '@/ui/MainHeading';
 import {useEffect, useState} from 'react';
 import {toast} from 'react-toastify';
 import Image from 'next/image';
 import {ShareButton} from '@/components/ShareButton';
 import Link from 'next/link';
+import useQRCode from '@/hooks/useQRCode';
+import {QRWithControls} from '@/ui/QRWithControls';
+
+const MAX_LONG_URL_LENGTH = 100;
 
 export default function ShortPage() {
   const [originUrl, setOriginUrl] = useState('');
@@ -16,7 +20,10 @@ export default function ShortPage() {
   const [shortUrl, setShortUrl] = useState('');
   const [isDisabled, setDisabled] = useState(false);
 
+  const {qrCode, qrCodeSvg, qrCodePngJpeg, generateQRCode} = useQRCode();
+
   const trimmedShortUrl = shortUrl.replace(/^https?:\/\//, '');
+  const symbolsLeft = MAX_LONG_URL_LENGTH - originUrl.length;
 
   const onInputChange = (e: any) => {
     setOriginUrl(e.target.value);
@@ -28,7 +35,6 @@ export default function ShortPage() {
     setShortUrl('https://short.url/abc123');
 
     // TODO: fetch api
-    // TODO: after: generate qr-code
   };
 
   const copyToClipboard = async () => {
@@ -43,12 +49,18 @@ export default function ShortPage() {
   useEffect(() => {
     if (!originUrl) return;
 
+    generateQRCode(originUrl);
     if (originUrl === lastProcessedUrl) {
       setDisabled(true);
     } else {
       setDisabled(false);
     }
   }, [originUrl, lastProcessedUrl]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onShortButtonClick();
+  };
 
   return (
     <Box className={styles.container}>
@@ -62,8 +74,7 @@ export default function ShortPage() {
             <Heading as='h2' size='3' mb='4'>
               Paste long link here:
             </Heading>
-            {/* <form > onSubmit={() => {}}> */}
-            <form>
+            <form onSubmit={handleSubmit}>
               <Flex
                 gap='3'
                 height='auto'
@@ -79,12 +90,24 @@ export default function ShortPage() {
                     onChange={onInputChange}
                     required
                     className={styles.inputRoot}
-                  />
+                  >
+                    <TextField.Slot side='right' color={symbolsLeft < 0 ? 'red' : undefined}>
+                      {symbolsLeft}
+                    </TextField.Slot>
+                    <TextField.Slot side='right' style={{cursor: 'pointer'}} onClick={() => setOriginUrl('')}>
+                      <Cross1Icon width={20} height={20} color='black' />
+                    </TextField.Slot>
+                  </TextField.Root>
                 </Box>
-                <Button size='3' disabled={isDisabled}>
+                <Button type='submit' size='3' disabled={isDisabled}>
                   Short it!
                 </Button>
               </Flex>
+              {symbolsLeft < 0 && (
+                <Text size='2' mt='2' color='red'>
+                  The maximum number of characters has been exceeded.
+                </Text>
+              )}
             </form>
           </Box>
         </Card>
@@ -99,7 +122,7 @@ export default function ShortPage() {
                 <Box className={styles.resultContainer}>
                   <div className={styles.resultLink}>
                     <Link href={shortUrl} target='_blank'>
-                      <Text className={styles.shortUrl} weight='bold' size='4'>
+                      <Text className={styles.shortUrl} weight='bold' size='6'>
                         <Link2Icon width={20} height={20} fill='inherit' />
                         {trimmedShortUrl}
                       </Text>
@@ -124,6 +147,17 @@ export default function ShortPage() {
                         <GearIcon width={20} height={20} color='black' />
                       </IconButton>
                     </Tooltip>
+                    <Tooltip content='Customize QR Code'>
+                      <IconButton size='3' variant='soft' disabled>
+                        <Image
+                          className={styles.qrCodeIcon}
+                          src='/svg/palette-icon.svg'
+                          alt='Customize QR code'
+                          width={20}
+                          height={20}
+                        />
+                      </IconButton>
+                    </Tooltip>
                     <Tooltip content='Show QR Code'>
                       <IconButton size='3' variant='soft'>
                         <Image
@@ -137,9 +171,14 @@ export default function ShortPage() {
                     </Tooltip>
                   </Flex>
                 </Box>
-                <Link href={shortUrl} target='_blank'>
-                  <Image height={100} width={100} alt='Shortening service QR example' src='/example-svg.svg' />
-                </Link>
+                {qrCode && (
+                  <QRWithControls
+                    shortUrl={shortUrl}
+                    qrCodeImageSrc={qrCode}
+                    qrCodeSvg={qrCodeSvg}
+                    qrCodePngJpeg={qrCodePngJpeg}
+                  />
+                )}
               </Flex>
             </Box>
           </Card>
