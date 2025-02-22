@@ -11,23 +11,23 @@ import {ShareButton} from '@/components/ShareButton';
 import Link from 'next/link';
 import useQRCode from '@/hooks/useQRCode';
 import {QRWithControls} from '@/ui/QRWithControls';
-
-const MAX_LONG_URL_LENGTH = 100;
+import {QRColorControls} from '@/ui/QRColorControls';
+import {MAX_LONG_URL_LENGTH} from '../constants';
 
 export default function ShortPage() {
   const [originUrl, setOriginUrl] = useState('');
   const [lastProcessedUrl, setLastProcessedUrl] = useState('');
   const [shortUrl, setShortUrl] = useState('');
   const [isDisabled, setDisabled] = useState(false);
+  const [showPalette, setShowPalette] = useState(false);
+
+  const [qrColor, setQrColor] = useState('#000');
+  const [qrBgColor, setQrBgColor] = useState('#fff');
 
   const {qrCode, qrCodeSvg, qrCodePngJpeg, generateQRCode} = useQRCode();
 
   const trimmedShortUrl = shortUrl.replace(/^https?:\/\//, '');
   const symbolsLeft = MAX_LONG_URL_LENGTH - originUrl.length;
-
-  const onInputChange = (e: any) => {
-    setOriginUrl(e.target.value);
-  };
 
   const onShortButtonClick = () => {
     setLastProcessedUrl(originUrl);
@@ -49,13 +49,13 @@ export default function ShortPage() {
   useEffect(() => {
     if (!originUrl) return;
 
-    generateQRCode(originUrl);
+    generateQRCode(originUrl, qrColor, qrBgColor);
     if (originUrl === lastProcessedUrl) {
       setDisabled(true);
     } else {
       setDisabled(false);
     }
-  }, [originUrl, lastProcessedUrl]);
+  }, [originUrl, lastProcessedUrl, qrColor, qrBgColor]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,7 +87,7 @@ export default function ShortPage() {
                     type='url'
                     placeholder='https://example.com/very-loooong-url'
                     value={originUrl}
-                    onChange={onInputChange}
+                    onChange={e => setOriginUrl(e.target.value)}
                     required
                     className={styles.inputRoot}
                   >
@@ -148,7 +148,7 @@ export default function ShortPage() {
                       </IconButton>
                     </Tooltip>
                     <Tooltip content='Customize QR Code'>
-                      <IconButton size='3' variant='soft' disabled>
+                      <IconButton size='3' variant='soft' onClick={() => setShowPalette(prev => !prev)}>
                         <Image
                           className={styles.qrCodeIcon}
                           src='/svg/palette-icon.svg'
@@ -170,6 +170,15 @@ export default function ShortPage() {
                       </IconButton>
                     </Tooltip>
                   </Flex>
+
+                  {showPalette && (
+                    <QRColorControls
+                      qrColor={qrColor}
+                      qrBgColor={qrBgColor}
+                      setQrColor={setQrColor}
+                      setQrBgColor={setQrBgColor}
+                    />
+                  )}
                 </Box>
                 {qrCode && (
                   <QRWithControls
